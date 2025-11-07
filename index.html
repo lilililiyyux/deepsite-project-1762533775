@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bisness Infini - Rêvez grand. Payez... peut-être.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        .cart-item-enter {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        .cart-item-enter-active {
+            opacity: 1;
+            transform: translateX(0);
+            transition: all 300ms ease-in;
+        }
+        .cart-item-exit {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .cart-item-exit-active {
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 300ms ease-in;
+        }
+        .blink {
+            animation: blink 1s step-start infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0.5; }
+        }
+        .infinity-symbol {
+            font-size: 1.5em;
+            line-height: 1;
+            display: inline-block;
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center mb-4 md:mb-0">
+                    <i class="fas fa-infinity text-4xl mr-3"></i>
+                    <div>
+                        <h1 class="text-3xl font-bold">Bisness Infini</h1>
+                        <p class="text-blue-100 italic">"Rêvez grand. Payez... peut-être."</p>
+                    </div>
+                </div>
+                <div id="balance-display" class="bg-white text-gray-800 px-6 py-3 rounded-full shadow-lg flex items-center">
+                    <span class="font-bold mr-2">Solde:</span>
+                    <span id="balance-amount" class="text-2xl font-extrabold text-purple-600">$∞</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Game Mode Selection (Initial Screen) -->
+    <div id="mode-selection" class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full mx-4">
+            <h2 class="text-3xl font-bold text-center mb-8 text-purple-700">Choisissez votre mode de jeu</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gradient-to-br from-green-100 to-blue-100 p-6 rounded-lg border-2 border-green-300 cursor-pointer hover:shadow-lg transition-all duration-300 text-center" onclick="selectMode('infinite')">
+                    <div class="bg-green-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-infinity text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-green-700">Mode Infini</h3>
+                    <p class="text-gray-700 mb-4">Argent illimité pour explorer sans limites</p>
+                    <div class="bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm font-medium inline-block">
+                        <i class="fas fa-coins mr-1"></i> Solde: $∞
+                    </div>
+                </div>
+                <div class="bg-gradient-to-br from-yellow-100 to-orange-100 p-6 rounded-lg border-2 border-yellow-300 cursor-pointer hover:shadow-lg transition-all duration-300 text-center" onclick="selectMode('career')">
+                    <div class="bg-yellow-500 text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-trophy text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-yellow-700">Mode Carrière</h3>
+                    <p class="text-gray-700 mb-4">Gérez stratégiquement vos ressources limitées</p>
+                    <div class="bg-yellow-200 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium inline-block">
+                        <i class="fas fa-coins mr-1"></i> Solde: $50,000
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 text-center text-gray-500 text-sm">
+                <i class="fas fa-info-circle mr-1"></i> Vous pourrez changer de mode plus tard dans les paramètres
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Left Column - Search and Products -->
+            <div class="lg:w-3/4">
+                <!-- Search Bar -->
+                <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                            <input type="text" id="search-input" class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500" placeholder="Rechercher des articles (yacht, or, pizza, fusée...)">
+                        </div>
+                        <select id="category-filter" class="bg-gray-50 border border-gray-300 text-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full md:w-auto p-3">
+                            <option value="all">Toutes catégories</option>
+                            <option value="immobilier">Immobilier</option>
+                            <option value="luxe">Luxe</option>
+                            <option value="technologie">Technologie</option>
+                            <option value="nourriture">Nourriture</option>
+                            <option value="transports">Transports</option>
+                            <option value="absurde">Absurde</option>
+                        </select>
+                        <button onclick="searchProducts()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-6 py-3 transition-colors">
+                            <i class="fas fa-search mr-2"></i> Rechercher
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Products will be loaded here -->
+                </div>
+
+                <!-- Loading More -->
+                <div id="loading-more" class="text-center mt-8 hidden">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-600"></div>
+                    <p class="mt-2 text-gray-600">Chargement des articles...</p>
+                </div>
+            </div>
+
+            <!-- Right Column - Cart and Stats -->
+            <div class="lg:w-1/4">
+                <!-- Cart -->
+                <div class="bg-white rounded-xl shadow-md sticky top-4">
+                    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-t-xl flex justify-between items-center">
+                        <h3 class="font-bold text-lg">
+                            <i class="fas fa-shopping-cart mr-2"></i> Votre Caddie de Rêve
+                        </h3>
+                        <span id="cart-count" class="bg-white text-blue-600 px-2 py-1 rounded-full text-xs font-bold">0</span>
+                    </div>
+                    <div class="p-4">
+                        <div id="cart-items" class="max-h-96 overflow-y-auto mb-4">
+                            <!-- Cart items will be loaded here -->
+                            <div class="text-center text-gray-500 py-8">
+                                <i class="fas fa-shopping-cart text-3xl mb-2"></i>
+                                <p>Votre panier est vide</p>
+                            </div>
+                        </div>
+                        <div class="border-t border-gray-200 pt-3">
+                            <div class="flex justify-between mb-2">
+                                <span class="font-medium">Sous-total:</span>
+                                <span id="cart-subtotal" class="font-bold">$0.00</span>
+                            </div>
+                            <button id="checkout-btn" onclick="checkout()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+                                <i class="fas fa-credit-card mr-2"></i> Simuler l'Achat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Player Stats -->
+                <div class="bg-white rounded-xl shadow-md mt-6">
+                    <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-t-xl">
+                        <h3 class="font-bold text-lg">
+                            <i class="fas fa-chart-line mr-2"></i> Vos Statistiques
+                        </h3>
+                    </div>
+                    <div class="p-4">
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-medium text-gray-600">Valeur totale des achats:</span>
+                                <span id="total-spent" class="text-sm font-bold">$0</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div id="spent-progress" class="bg-purple-600 h-2 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-sm font-medium text-gray-600">Nombre total d'achats:</span>
+                                <span id="total-purchases" class="text-sm font-bold">0</span>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-600 mb-1">Article le plus cher:</p>
+                            <div id="most-expensive" class="text-sm italic text-gray-500">Aucun achat encore</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Missions (Career Mode) -->
+                <div id="missions-container" class="bg-white rounded-xl shadow-md mt-6 hidden">
+                    <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-3 rounded-t-xl">
+                        <h3 class="font-bold text-lg">
+                            <i class="fas fa-tasks mr-2"></i> Vos Missions
+                        </h3>
+                    </div>
+                    <div class="p-4">
+                        <div id="missions-list">
+                            <!-- Missions will be loaded here -->
+                            <div class="text-center text-gray-500 py-4">
+                                Chargement des missions...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Purchase Confirmation Modal -->
+    <div id="purchase-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                    <i class="fas fa-check-circle text-green-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2" id="modal-title">Achat réussi!</h3>
+                <div class="mb-4">
+                    <p id="modal-message" class="text-gray-600">Votre achat a été simulé avec succès.</p>
+                    <p id="modal-details" class="text-sm text-gray-500 mt-2"></p>
+                </div>
+                <div class="bg-gray-100 p-3 rounded-lg mb-4">
+                    <p class="text-sm font-medium text-gray-700">Nouveau solde:</p>
+                    <p id="modal-new-balance" class="text-xl font-bold text-purple-600">$∞</p>
+                </div>
+                <button onclick="closeModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Continuer mes achats
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 relative">
+            <button onclick="closeErrorModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                    <i class="fas fa-exclamation-circle text-red-600 text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Transaction refusée</h3>
+                <div class="mb-4">
+                    <p id="error-message" class="text-gray-600">Solde insuffisant.</p>
+                </div>
+                <div class="bg-gray-100 p-3 rounded-lg mb-4">
+                    <p class="text-sm font-medium text-gray-700">Il vous manque:</p>
+                    <p id="missing-amount" class="text-xl font-bold text-red-600">$0.00</p>
+                </div>
+                <button onclick="closeErrorModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    Compris
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            mode: null, // 'infinite' or 'career'
+            balance: Infinity,
+            cart: [],
+            totalSpent: 0,
+            totalPurchases: 0,
+            mostExpensiveItem: null,
+            missions: [
+                { id: 1, title: "Acheter 3 articles de luxe", target: 3, progress: 0, reward: 5000, completed: false },
+                { id: 2, title: "Faire un achat groupé de $10,000", target: 10000, progress: 0, reward: 15000, completed: false },
+                { id: 3, title: "Acheter un article de plus de $50,000", target: 1, progress: 0, reward: 10000, completed: false },
+                { id: 4, title: "Acheter 5 articles de technologie", target: 5, progress: 0, reward: 8000, completed: false },
+                { id: 5, title: "Dépenser un total de $100,000", target: 100000, progress: 0, reward: 20000, completed: false }
+            ]
+        };
+
+        // Product Database
+        const products = [
+            // Immobilier
+            { id: 1, name: "Appartement à Paris", price: 750000, category: "immobilier", image: "🏙️" },
+            { id: 2, name: "Villa à Saint-Tropez", price: 3500000, category: "immobilier", image: "🏡" },
+            { id: 3, name: "Château de la Loire", price: 12000000, category: "immobilier", image: "🏰" },
+            { id: 4, name: "Penthouse à
+</body>
+</html>
